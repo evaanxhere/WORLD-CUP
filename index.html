@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FIFA World Cup 2026 — Live</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,900&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <span class="topbar__mark">FIFA WC 2026</span>
+    <div class="topbar__status" id="apiStatus">
+      <span class="status-pip" id="statusPip"></span>
+      <span id="statusText">Connecting…</span>
+    </div>
+    <span class="topbar__host">USA · CAN · MEX</span>
+  </header>
+
+  <main class="wrap">
+
+    <!-- ══ LIVE / RECENT — FIRST THING YOU SEE ══ -->
+    <section class="block" id="live-block">
+      <div class="block-head">
+        <h1 class="block-title">Live &amp; Recent</h1>
+        <p class="block-sub" id="liveSub">Pulling latest results…</p>
+      </div>
+      <div class="cards" id="liveCards"></div>
+    </section>
+
+    <!-- ══ UPCOMING ══ -->
+    <section class="block">
+      <div class="block-head">
+        <h2 class="block-title block-title--sm">Upcoming Fixtures</h2>
+      </div>
+      <div class="fixtures" id="fixturesList"></div>
+    </section>
+
+    <!-- ══ GROUPS ══ -->
+    <section class="block">
+      <div class="block-head">
+        <h2 class="block-title block-title--sm">Group Standings</h2>
+        <span class="manual-tag">Updated manually</span>
+      </div>
+      <div class="group-tabs" id="groupTabs"></div>
+      <div class="group-table-wrap" id="groupPanel"></div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <span>FIFA World Cup 2026 · Scores via TheSportsDB (free public API), refreshed on load</span>
+  </footer>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
