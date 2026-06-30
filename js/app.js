@@ -1,103 +1,151 @@
-/* js/app.js — interactions, scroll tracking, animations */
+// js/app.js — section transitions, reveal system, nav, keyboard
 
-/* ── COUNT-UP ────────────────────────────────────── */
-function countUp(el) {
-  const target = parseInt(el.dataset.countup, 10);
-  const duration = 1200;
-  const start = performance.now();
+(function () {
 
-  function tick(now) {
-    const elapsed = now - start;
-    const progress = Math.min(elapsed / duration, 1);
-    // ease out expo
-    const eased = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
-    el.textContent = Math.floor(eased * target);
-    if (progress < 1) requestAnimationFrame(tick);
+  // ── STATE ─────────────────────────────────────
+  const ORDER    = ['hero', 'scores', 'groups', 'fixtures'];
+  let current    = 0;
+  let animating  = false;
+
+  const overlay  = document.getElementById('transitionOverlay');
+  const dots     = document.querySelectorAll('.sidenav__dot');
+
+  // ── TRANSITION ────────────────────────────────
+  function goTo(targetIdx) {
+    if (targetIdx === current || animating) return;
+    animating = true;
+
+    const fromId = ORDER[current];
+    const toId   = ORDER[targetIdx];
+    const dir    = targetIdx > current ? 1 : -1; // 1=forward, -1=back
+
+    const fromSec = document.getElementById(fromId);
+    const toSec   = document.getElementById(toId);
+
+    // Step 1: wipe overlay IN (ink covers screen)
+    overlay.classList.remove('wipe-out');
+    overlay.classList.add('wipe-in');
+
+    setTimeout(() => {
+      // Step 2: swap sections while covered
+      fromSec.classList.remove('active');
+      toSec.classList.add('active');
+      toSec.scrollTop = 0;
+
+      // Update dots
+      dots.forEach((d, i) => d.classList.toggle('active', i === targetIdx));
+
+      current = targetIdx;
+
+      // Trigger element reveals on the new section
+      revealSection(toSec);
+
+    }, 340); // halfway through wipe-in
+
+    setTimeout(() => {
+      // Step 3: wipe OUT
+      overlay.classList.remove('wipe-in');
+      overlay.classList.add('wipe-out');
+
+      setTimeout(() => {
+        overlay.classList.remove('wipe-out');
+        animating = false;
+      }, 440);
+
+    }, 400);
   }
 
-  requestAnimationFrame(tick);
-}
-
-/* ── SNAP SCROLL + SIDE NAV ──────────────────────── */
-const container   = document.getElementById('snapContainer');
-const sections    = Array.from(document.querySelectorAll('.snap-section'));
-const navDots     = Array.from(document.querySelectorAll('.sidenav__dot'));
-const sectionH    = () => container.clientHeight;
-let   currentIdx  = 0;
-let   ticking     = false;
-
-function activateSection(idx) {
-  // update dots
-  navDots.forEach((d, i) => d.classList.toggle('active', i === idx));
-  currentIdx = idx;
-
-  // trigger reveals inside the active section
-  const sec = sections[idx];
-  sec.querySelectorAll('[data-reveal]').forEach((el, i) => {
-    setTimeout(() => el.classList.add('revealed'), i * 100);
-  });
-
-  // stagger cards / rows
-  sec.querySelectorAll('.match-card, .fixture-row').forEach((el, i) => {
-    setTimeout(() => el.classList.add('visible'), 80 + i * 50);
-  });
-
-  // countup numbers
-  sec.querySelectorAll('[data-countup]').forEach(el => {
-    if (!el.dataset.counted) {
-      el.dataset.counted = '1';
-      countUp(el);
-    }
-  });
-}
-
-// Read which section is in view via scroll position
-function onScroll() {
-  if (!ticking) {
-    requestAnimationFrame(() => {
-      const scrollTop = container.scrollTop;
-      const h = sectionH();
-      const idx = Math.round(scrollTop / h);
-      const clamped = Math.max(0, Math.min(idx, sections.length - 1));
-      if (clamped !== currentIdx) activateSection(clamped);
-      ticking = false;
+  // ── REVEAL SYSTEM ────────────────────────────
+  function revealSection(sec) {
+    // [data-anim] elements — stagger by data-delay
+    sec.querySelectorAll('[data-anim]').forEach(el => {
+      const delay = parseInt(el.dataset.delay || 0);
+      setTimeout(() => el.classList.add('anim-in'), delay);
     });
-    ticking = true;
+
+    // Cards stagger
+    sec.querySelectorAll('.card-flip').forEach((el, i) => {
+      setTimeout(() => el.classList.add('anim-in'), 200 + i * 50);
+    });
+
+    // Fixture rows stagger
+    sec.querySelectorAll('.fixture-row').forEach((el, i) => {
+      setTimeout(() => el.classList.add('anim-in'), 200 + i * 55);
+    });
+
+    // Countup numbers
+    sec.querySelectorAll('[data-countup]').forEach(el => {
+      setTimeout(() => countUp(el), 400);
+    });
+
+    // Probability bars
+    fillProbBars(sec);
   }
-}
 
-container.addEventListener('scroll', onScroll, { passive: true });
-
-// Dot clicks
-navDots.forEach((dot, i) => {
-  dot.addEventListener('click', () => {
-    container.scrollTo({ top: i * sectionH(), behavior: 'smooth' });
+  // ── SIDE NAV ─────────────────────────────────
+  dots.forEach((dot, i) => {
+    dot.addEventListener('click', () => goTo(i));
   });
-});
 
-/* ── SECTION LABEL REVEAL via IntersectionObserver ─ */
-const revealObs = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('revealed');
+  // ── CTA BUTTONS ──────────────────────────────
+  document.querySelectorAll('[data-goto]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = ORDER.indexOf(btn.dataset.goto);
+      if (target !== -1) goTo(target);
+    });
+  });
+
+  // ── KEYBOARD ─────────────────────────────────
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === 'ArrowRight') {
+      goTo(Math.min(current + 1, ORDER.length - 1));
     }
+    if (e.key === 'ArrowUp' || e.key === 'PageUp' || e.key === 'ArrowLeft') {
+      goTo(Math.max(current - 1, 0));
+    }
+    // number keys 1-4
+    const num = parseInt(e.key) - 1;
+    if (num >= 0 && num < ORDER.length) goTo(num);
   });
-}, { threshold: 0.15, root: container });
 
-document.querySelectorAll('[data-reveal]').forEach(el => revealObs.observe(el));
+  // ── MOUSE WHEEL ──────────────────────────────
+  let wheelTimer = null;
+  document.addEventListener('wheel', e => {
+    // Only trigger section change if the current section's scroll is at boundary
+    const sec = document.getElementById(ORDER[current]);
+    const atBottom = sec.scrollTop + sec.clientHeight >= sec.scrollHeight - 4;
+    const atTop    = sec.scrollTop <= 0;
 
-/* ── KEYBOARD NAV ────────────────────────────────── */
-document.addEventListener('keydown', e => {
-  if (e.key === 'ArrowDown' || e.key === 'PageDown') {
-    const next = Math.min(currentIdx + 1, sections.length - 1);
-    container.scrollTo({ top: next * sectionH(), behavior: 'smooth' });
-  }
-  if (e.key === 'ArrowUp' || e.key === 'PageUp') {
-    const prev = Math.max(currentIdx - 1, 0);
-    container.scrollTo({ top: prev * sectionH(), behavior: 'smooth' });
-  }
-});
+    if (e.deltaY > 30 && atBottom) {
+      if (wheelTimer) return;
+      goTo(Math.min(current + 1, ORDER.length - 1));
+      wheelTimer = setTimeout(() => { wheelTimer = null; }, 1000);
+    }
+    if (e.deltaY < -30 && atTop) {
+      if (wheelTimer) return;
+      goTo(Math.max(current - 1, 0));
+      wheelTimer = setTimeout(() => { wheelTimer = null; }, 1000);
+    }
+  }, { passive: true });
 
-/* ── INIT ────────────────────────────────────────── */
-// Activate hero on load
-setTimeout(() => activateSection(0), 100);
+  // ── TOUCH SWIPE ──────────────────────────────
+  let touchStartY = 0;
+  document.addEventListener('touchstart', e => {
+    touchStartY = e.touches[0].clientY;
+  }, { passive: true });
+
+  document.addEventListener('touchend', e => {
+    const delta = touchStartY - e.changedTouches[0].clientY;
+    if (Math.abs(delta) < 50) return;
+    if (delta > 0) goTo(Math.min(current + 1, ORDER.length - 1));
+    else           goTo(Math.max(current - 1, 0));
+  }, { passive: true });
+
+  // ── INIT ─────────────────────────────────────
+  // Reveal hero on load
+  setTimeout(() => {
+    const heroSec = document.getElementById('hero');
+    revealSection(heroSec);
+  }, 150);
+
+})();
