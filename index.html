@@ -6,1212 +6,146 @@
   <title>FIFA World Cup 2026</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <style>
-/* ═══════════════════════════════════════════════════
-   TOKENS
-═══════════════════════════════════════════════════ */
-:root {
-  --ink:      #0A0A0A;
-  --ink-mid:  #3A3A3A;
-  --ink-soft: #8A8A8A;
-  --ink-faint:#C8C8C8;
-  --paper:    #F7F7F5;
-  --paper-2:  #F0F0ED;
-  --red:      #E8001D;   /* used once: live pip */
-  --rule:     rgba(10,10,10,0.10);
-
-  --f-display: 'Playfair Display', Georgia, serif;
-  --f-sans:    'DM Sans', system-ui, sans-serif;
-  --f-mono:    'DM Mono', 'Courier New', monospace;
-
-  --ease-out-expo:  cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-in-out:    cubic-bezier(0.45, 0, 0.55, 1);
-
-  --nav-w: 32px;
-  --topbar-h: 48px;
-}
-
-/* ═══════════════════════════════════════════════════
-   RESET + BASE
-═══════════════════════════════════════════════════ */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-html { font-size: 16px; }
-
-body {
-  background: var(--paper);
-  color: var(--ink);
-  font-family: var(--f-sans);
-  font-weight: 300;
-  -webkit-font-smoothing: antialiased;
-  overflow: hidden;          /* snap container owns scroll */
-}
-
-/* ═══════════════════════════════════════════════════
-   TOP BAR
-═══════════════════════════════════════════════════ */
-.topbar {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  height: var(--topbar-h);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 40px 0 60px;
-  z-index: 200;
-  background: var(--paper);
-  border-bottom: 1px solid var(--rule);
-}
-
-.topbar__wordmark {
-  font-family: var(--f-display);
-  font-weight: 900;
-  font-size: 18px;
-  letter-spacing: -0.02em;
-  color: var(--ink);
-}
-
-.topbar__live {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-family: var(--f-mono);
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  color: var(--ink-soft);
-  text-transform: uppercase;
-}
-
-.live-pip {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--red);
-  animation: pip-pulse 2s ease-in-out infinite;
-}
-
-@keyframes pip-pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50%       { opacity: 0.4; transform: scale(0.7); }
-}
-
-.topbar__host {
-  font-family: var(--f-mono);
-  font-size: 11px;
-  letter-spacing: 0.12em;
-  color: var(--ink-faint);
-  text-transform: uppercase;
-}
-
-/* ═══════════════════════════════════════════════════
-   SIDE NAV DOTS
-═══════════════════════════════════════════════════ */
-.sidenav {
-  position: fixed;
-  left: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 200;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.sidenav__dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  border: none;
-  background: var(--ink-faint);
-  cursor: pointer;
-  transition: background 0.3s var(--ease-out-expo),
-              transform 0.3s var(--ease-out-expo);
-  padding: 0;
-}
-
-.sidenav__dot.active {
-  background: var(--ink);
-  transform: scale(1.4);
-}
-
-.sidenav__dot:hover:not(.active) {
-  background: var(--ink-soft);
-}
-
-/* ═══════════════════════════════════════════════════
-   SNAP CONTAINER
-═══════════════════════════════════════════════════ */
-.snap-container {
-  position: fixed;
-  top: var(--topbar-h);
-  left: 0; right: 0;
-  bottom: 0;
-  overflow-y: scroll;
-  scroll-snap-type: y mandatory;
-  -webkit-overflow-scrolling: touch;
-  scroll-behavior: smooth;
-}
-
-.snap-section {
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
-  height: calc(100vh - var(--topbar-h));
-  position: relative;
-  overflow: hidden;
-}
-
-/* ═══════════════════════════════════════════════════
-   SECTION SHARED LAYOUT
-═══════════════════════════════════════════════════ */
-.section-layout {
-  display: grid;
-  grid-template-columns: 140px 1fr;
-  height: 100%;
-  padding: 0 60px 0 60px;
-}
-
-.section-label {
-  display: flex;
-  align-items: flex-end;
-  padding-bottom: 60px;
-  border-right: 1px solid var(--rule);
-}
-
-.section-label__text {
-  font-family: var(--f-mono);
-  font-size: 10px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-}
-
-.section-content {
-  padding: 64px 0 48px 60px;
-  overflow-y: auto;
-  scrollbar-width: none;
-}
-.section-content::-webkit-scrollbar { display: none; }
-
-.section-heading {
-  font-family: var(--f-display);
-  font-size: clamp(40px, 5vw, 72px);
-  font-weight: 700;
-  line-height: 1.05;
-  letter-spacing: -0.02em;
-  color: var(--ink);
-  margin-bottom: 48px;
-}
-
-.section-heading em {
-  font-style: italic;
-  font-weight: 400;
-  color: var(--ink-mid);
-}
-
-/* ═══════════════════════════════════════════════════
-   HERO
-═══════════════════════════════════════════════════ */
-#sec-hero {
-  background: var(--paper);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.hero {
-  text-align: center;
-  padding: 0 40px;
-  position: relative;
-  z-index: 2;
-}
-
-.hero__kicker {
-  font-family: var(--f-mono);
-  font-size: 11px;
-  letter-spacing: 0.20em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-  margin-bottom: 28px;
-}
-
-.hero__headline {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0;
-  margin-bottom: 56px;
-}
-
-.hero__line {
-  display: block;
-  line-height: 1;
-}
-
-.hero__line--serif {
-  font-family: var(--f-display);
-  font-size: clamp(52px, 9vw, 130px);
-  font-weight: 400;
-  letter-spacing: -0.02em;
-  color: var(--ink);
-}
-
-.hero__line--display {
-  font-family: var(--f-display);
-  font-size: clamp(96px, 18vw, 260px);
-  font-weight: 900;
-  letter-spacing: -0.04em;
-  color: var(--ink);
-  line-height: 0.88;
-}
-
-.hero__line--italic {
-  font-style: italic;
-  font-weight: 400;
-  color: var(--ink-mid);
-}
-
-.hero__meta {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 40px;
-  margin-bottom: 64px;
-}
-
-.hero__stat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-}
-
-.hero__stat-num {
-  font-family: var(--f-display);
-  font-size: 44px;
-  font-weight: 900;
-  letter-spacing: -0.03em;
-  color: var(--ink);
-  line-height: 1;
-}
-
-.hero__stat-label {
-  font-family: var(--f-mono);
-  font-size: 10px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-}
-
-.hero__divider {
-  width: 1px;
-  height: 40px;
-  background: var(--rule);
-}
-
-.hero__scroll-hint {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-}
-
-.hero__scroll-hint span {
-  font-family: var(--f-mono);
-  font-size: 10px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-}
-
-.hero__scroll-line {
-  width: 1px;
-  height: 40px;
-  background: var(--ink-faint);
-  transform-origin: top;
-  animation: scroll-line 2s var(--ease-in-out) infinite;
-}
-
-@keyframes scroll-line {
-  0%   { transform: scaleY(0); opacity: 0; }
-  40%  { transform: scaleY(1); opacity: 1; }
-  100% { transform: scaleY(1); opacity: 0; transform-origin: bottom; }
-}
-
-/* Architectural background element */
-.hero__bg-rule {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 1;
-  overflow: hidden;
-}
-
-.hero__bg-rule::before {
-  content: '2026';
-  position: absolute;
-  bottom: -20px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-family: var(--f-display);
-  font-weight: 900;
-  font-size: clamp(140px, 28vw, 400px);
-  color: var(--paper-2);
-  letter-spacing: -0.05em;
-  white-space: nowrap;
-  user-select: none;
-  line-height: 1;
-}
-
-/* ═══════════════════════════════════════════════════
-   SCORES GRID
-═══════════════════════════════════════════════════ */
-.scores-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1px;
-  background: var(--rule);
-  border: 1px solid var(--rule);
-}
-
-.match-card {
-  background: var(--paper);
-  padding: 28px 24px;
-  position: relative;
-  cursor: default;
-  transition: background 0.25s var(--ease-out-expo);
-  overflow: hidden;
-}
-
-.match-card::after {
-  content: '';
-  position: absolute;
-  bottom: 0; left: 24px; right: 24px;
-  height: 2px;
-  background: var(--ink);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.4s var(--ease-out-expo);
-}
-
-.match-card:hover { background: var(--paper-2); }
-.match-card:hover::after { transform: scaleX(1); }
-
-.match-card__status {
-  font-family: var(--f-mono);
-  font-size: 9px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-  margin-bottom: 20px;
-}
-
-.match-card__teams {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.match-card__team {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  flex: 1;
-}
-
-.match-card__flag {
-  font-size: 28px;
-  line-height: 1;
-}
-
-.match-card__abbr {
-  font-family: var(--f-mono);
-  font-size: 11px;
-  letter-spacing: 0.12em;
-  color: var(--ink-mid);
-  text-transform: uppercase;
-}
-
-.match-card__scoreline {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-  flex-shrink: 0;
-}
-
-.match-card__score {
-  font-family: var(--f-display);
-  font-size: 52px;
-  font-weight: 900;
-  letter-spacing: -0.04em;
-  color: var(--ink);
-  line-height: 1;
-}
-
-.match-card__sep {
-  font-family: var(--f-display);
-  font-size: 28px;
-  font-weight: 400;
-  color: var(--ink-faint);
-  line-height: 1;
-}
-
-/* ═══════════════════════════════════════════════════
-   GROUP TABS + PANEL
-═══════════════════════════════════════════════════ */
-.group-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2px;
-  margin-bottom: 32px;
-}
-
-.group-tab {
-  font-family: var(--f-mono);
-  font-size: 11px;
-  letter-spacing: 0.10em;
-  padding: 8px 14px;
-  border: 1px solid var(--rule);
-  background: transparent;
-  color: var(--ink-soft);
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s, border-color 0.2s;
-  text-transform: uppercase;
-}
-
-.group-tab:hover {
-  background: var(--paper-2);
-  color: var(--ink);
-}
-
-.group-tab.active {
-  background: var(--ink);
-  color: var(--paper);
-  border-color: var(--ink);
-}
-
-/* Group table */
-.group-table-wrap {
-  animation: panel-in 0.4s var(--ease-out-expo);
-}
-
-@keyframes panel-in {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.group-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.group-table thead th {
-  font-family: var(--f-mono);
-  font-size: 9px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-  padding: 0 12px 12px;
-  text-align: right;
-  font-weight: 400;
-  border-bottom: 1px solid var(--rule);
-}
-
-.group-table thead th:first-child { text-align: left; }
-
-.group-table tbody tr {
-  border-bottom: 1px solid var(--rule);
-  transition: background 0.2s;
-  cursor: default;
-}
-
-.group-table tbody tr:hover { background: var(--paper-2); }
-
-.group-table tbody tr.qualifies td:first-child {
-  border-left: 2px solid var(--ink);
-}
-
-.group-table td {
-  padding: 14px 12px;
-  text-align: right;
-  font-size: 13px;
-  color: var(--ink-mid);
-}
-
-.group-table td:first-child { text-align: left; }
-
-.td-team {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.td-flag { font-size: 20px; }
-
-.td-name {
-  font-family: var(--f-sans);
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--ink);
-  letter-spacing: -0.01em;
-}
-
-.td-pts {
-  font-family: var(--f-display);
-  font-size: 22px;
-  font-weight: 900;
-  letter-spacing: -0.02em;
-  color: var(--ink);
-}
-
-/* ═══════════════════════════════════════════════════
-   FIXTURES LIST
-═══════════════════════════════════════════════════ */
-.fixtures-list {
-  display: flex;
-  flex-direction: column;
-}
-
-.fixture-row {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: 24px;
-  padding: 20px 0;
-  border-bottom: 1px solid var(--rule);
-  cursor: default;
-  transition: background 0.2s;
-  position: relative;
-}
-
-.fixture-row::before {
-  content: '';
-  position: absolute;
-  left: -60px; right: -60px;
-  top: 0; bottom: 0;
-  background: var(--paper-2);
-  opacity: 0;
-  transition: opacity 0.25s;
-  pointer-events: none;
-}
-
-.fixture-row:hover::before { opacity: 1; }
-
-.fixture-team {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  position: relative;
-  z-index: 1;
-}
-
-.fixture-team--away {
-  flex-direction: row-reverse;
-  text-align: right;
-}
-
-.fixture-flag { font-size: 22px; }
-
-.fixture-name {
-  font-family: var(--f-sans);
-  font-size: 15px;
-  font-weight: 500;
-  color: var(--ink);
-  letter-spacing: -0.01em;
-}
-
-.fixture-center {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  position: relative;
-  z-index: 1;
-}
-
-.fixture-vs {
-  font-family: var(--f-mono);
-  font-size: 10px;
-  letter-spacing: 0.12em;
-  color: var(--ink-faint);
-  text-transform: uppercase;
-}
-
-.fixture-time {
-  font-family: var(--f-display);
-  font-size: 13px;
-  font-style: italic;
-  color: var(--ink-soft);
-  white-space: nowrap;
-}
-
-/* Win probability mini bar */
-.fixture-prob {
-  display: flex;
-  height: 2px;
-  width: 80px;
-  overflow: hidden;
-  background: var(--ink-faint);
-}
-
-.fixture-prob__home {
-  background: var(--ink);
-  transition: width 0.8s var(--ease-out-expo);
-}
-
-/* ═══════════════════════════════════════════════════
-   REVEAL ANIMATION SYSTEM
-═══════════════════════════════════════════════════ */
-[data-reveal] {
-  opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.8s var(--ease-out-expo),
-              transform 0.8s var(--ease-out-expo);
-}
-
-[data-reveal].revealed {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* stagger children with data-stagger on parent */
-[data-stagger] [data-reveal]:nth-child(1) { transition-delay: 0ms; }
-[data-stagger] [data-reveal]:nth-child(2) { transition-delay: 80ms; }
-[data-stagger] [data-reveal]:nth-child(3) { transition-delay: 160ms; }
-[data-stagger] [data-reveal]:nth-child(4) { transition-delay: 240ms; }
-
-/* ── match card stagger ── */
-.match-card {
-  opacity: 0;
-  transform: translateY(16px);
-  transition: background 0.25s var(--ease-out-expo),
-              opacity 0.6s var(--ease-out-expo),
-              transform 0.6s var(--ease-out-expo);
-}
-
-.match-card.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* ── fixture row stagger ── */
-.fixture-row {
-  opacity: 0;
-  transform: translateY(12px);
-  transition: opacity 0.5s var(--ease-out-expo),
-              transform 0.5s var(--ease-out-expo);
-}
-
-.fixture-row.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* ═══════════════════════════════════════════════════
-   SCROLLBAR (snap container only)
-═══════════════════════════════════════════════════ */
-.snap-container::-webkit-scrollbar { display: none; }
-
-/* ═══════════════════════════════════════════════════
-   RESPONSIVE
-═══════════════════════════════════════════════════ */
-@media (max-width: 768px) {
-  .topbar { padding: 0 20px; }
-  .sidenav { display: none; }
-  .section-layout {
-    grid-template-columns: 1fr;
-    padding: 0 20px;
-  }
-  .section-label { display: none; }
-  .section-content { padding: 48px 0 40px; }
-  .hero__line--display { font-size: clamp(80px, 22vw, 200px); }
-  .fixture-prob { display: none; }
-  .fixture-row { grid-template-columns: 1fr auto 1fr; gap: 12px; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-</style>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,900&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
 
-  <!-- Side nav dots -->
-  <nav class="sidenav" aria-label="Section navigation">
-    <button class="sidenav__dot active" data-target="0" aria-label="Hero"></button>
-    <button class="sidenav__dot" data-target="1" aria-label="Scores"></button>
-    <button class="sidenav__dot" data-target="2" aria-label="Groups"></button>
-    <button class="sidenav__dot" data-target="3" aria-label="Fixtures"></button>
-  </nav>
+  <!-- ── CURSOR ── -->
+  <div id="cursor"><div id="cursor-dot"></div></div>
 
-  <!-- Top bar -->
+  <!-- ── TOP BAR ── -->
   <header class="topbar">
-    <span class="topbar__wordmark">2026</span>
-    <div class="topbar__live">
-      <span class="live-pip"></span>
-      <span>Group Stage</span>
+    <div class="topbar__left">
+      <span class="topbar__wordmark">FIFA WC 2026</span>
     </div>
-    <span class="topbar__host">USA · CAN · MEX</span>
+    <div class="topbar__center">
+      <div class="live-badge">
+        <span class="live-pip"></span>
+        <span>Group Stage · Live</span>
+      </div>
+    </div>
+    <div class="topbar__right">
+      <span class="topbar__host">USA · CAN · MEX</span>
+    </div>
   </header>
 
-  <!-- ─── SNAP CONTAINER ─── -->
-  <main class="snap-container" id="snapContainer">
+  <!-- ── SIDE NAV ── -->
+  <nav class="sidenav">
+    <button class="sidenav__dot active" data-section="hero"><span>Home</span></button>
+    <button class="sidenav__dot" data-section="scores"><span>Scores</span></button>
+    <button class="sidenav__dot" data-section="groups"><span>Groups</span></button>
+    <button class="sidenav__dot" data-section="fixtures"><span>Fixtures</span></button>
+  </nav>
 
-    <!-- ── SECTION 0 · HERO ── -->
-    <section class="snap-section" id="sec-hero" data-index="0">
-      <div class="hero">
-        <div class="hero__kicker" data-reveal>FIFA World Cup</div>
-        <h1 class="hero__headline" data-reveal>
-          <span class="hero__line hero__line--serif">The</span>
-          <span class="hero__line hero__line--display">World</span>
-          <span class="hero__line hero__line--serif hero__line--italic">Plays.</span>
+  <!-- ── PAGE WRAPPER ── -->
+  <div id="pageWrapper">
+
+    <!-- ══ SECTION: HERO ══ -->
+    <section id="hero" class="page active">
+      <div class="parallax-layer" data-depth="0.1">
+        <div class="hero-ghost">2026</div>
+      </div>
+      <div class="parallax-layer" data-depth="0.4">
+        <div class="hero-rule-v"></div>
+      </div>
+      <div class="parallax-layer hero-content" data-depth="0.7">
+        <p class="hero-kicker" data-anim="fade-up" data-delay="0">FIFA World Cup</p>
+        <h1 class="hero-headline">
+          <span class="hero-line" data-anim="clip-up" data-delay="100">The</span>
+          <span class="hero-line hero-line--big" data-anim="clip-up" data-delay="200">World</span>
+          <span class="hero-line hero-line--italic" data-anim="clip-up" data-delay="300">Plays.</span>
         </h1>
-        <div class="hero__meta" data-reveal>
-          <div class="hero__stat">
-            <span class="hero__stat-num" data-countup="48">0</span>
-            <span class="hero__stat-label">nations</span>
+        <div class="hero-stats" data-anim="fade-up" data-delay="500">
+          <div class="hero-stat">
+            <span class="hero-stat__num" data-countup="48">0</span>
+            <span class="hero-stat__label">Nations</span>
           </div>
-          <div class="hero__divider"></div>
-          <div class="hero__stat">
-            <span class="hero__stat-num" data-countup="12">0</span>
-            <span class="hero__stat-label">groups</span>
+          <div class="hero-stat__sep"></div>
+          <div class="hero-stat">
+            <span class="hero-stat__num" data-countup="12">0</span>
+            <span class="hero-stat__label">Groups</span>
           </div>
-          <div class="hero__divider"></div>
-          <div class="hero__stat">
-            <span class="hero__stat-num" data-countup="104">0</span>
-            <span class="hero__stat-label">matches</span>
+          <div class="hero-stat__sep"></div>
+          <div class="hero-stat">
+            <span class="hero-stat__num" data-countup="104">0</span>
+            <span class="hero-stat__label">Matches</span>
+          </div>
+          <div class="hero-stat__sep"></div>
+          <div class="hero-stat">
+            <span class="hero-stat__num" data-countup="16">0</span>
+            <span class="hero-stat__label">Venues</span>
           </div>
         </div>
-        <div class="hero__scroll-hint" data-reveal>
-          <span>Scroll</span>
-          <div class="hero__scroll-line"></div>
-        </div>
+        <button class="hero-cta" data-anim="fade-up" data-delay="700" data-goto="scores">
+          <span>View Scores</span>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
       </div>
-      <!-- Architectural background line -->
-      <div class="hero__bg-rule"></div>
-    </section>
-
-    <!-- ── SECTION 1 · SCORES ── -->
-    <section class="snap-section" id="sec-scores" data-index="1">
-      <div class="section-layout">
-        <aside class="section-label" data-reveal>
-          <span class="section-label__text">Match Results</span>
-        </aside>
-        <div class="section-content">
-          <h2 class="section-heading" data-reveal>Recent<br /><em>Scores</em></h2>
-          <div class="scores-grid" id="scoresGrid"></div>
-        </div>
+      <div class="hero-scroll-hint" data-anim="fade-up" data-delay="900">
+        <span>Scroll</span>
+        <div class="hero-scroll-line"></div>
       </div>
     </section>
 
-    <!-- ── SECTION 2 · GROUPS ── -->
-    <section class="snap-section" id="sec-groups" data-index="2">
-      <div class="section-layout">
-        <aside class="section-label" data-reveal>
-          <span class="section-label__text">Group Stage</span>
-        </aside>
-        <div class="section-content">
-          <h2 class="section-heading" data-reveal>Standing<br /><em>Tables</em></h2>
-          <!-- Group filter tabs -->
-          <div class="group-tabs" id="groupTabs" data-reveal></div>
+    <!-- ══ SECTION: SCORES ══ -->
+    <section id="scores" class="page">
+      <div class="page-inner">
+        <div class="page-header">
+          <div class="page-label" data-anim="fade-right" data-delay="0">Match Results</div>
+          <h2 class="page-title" data-anim="clip-up" data-delay="100">
+            Recent<br/><em>Scores</em>
+          </h2>
+          <p class="page-sub" data-anim="fade-up" data-delay="200">Tap any card to see details</p>
+        </div>
+        <div class="scores-grid" id="scoresGrid"></div>
+      </div>
+    </section>
+
+    <!-- ══ SECTION: GROUPS ══ -->
+    <section id="groups" class="page">
+      <div class="page-inner">
+        <div class="page-header">
+          <div class="page-label" data-anim="fade-right" data-delay="0">Group Stage</div>
+          <h2 class="page-title" data-anim="clip-up" data-delay="100">
+            Standing<br/><em>Tables</em>
+          </h2>
+        </div>
+        <div class="group-tabs" id="groupTabs" data-anim="fade-up" data-delay="200"></div>
+        <div class="group-panel-wrap">
           <div class="group-panel" id="groupPanel"></div>
         </div>
       </div>
     </section>
 
-    <!-- ── SECTION 3 · FIXTURES ── -->
-    <section class="snap-section" id="sec-fixtures" data-index="3">
-      <div class="section-layout">
-        <aside class="section-label" data-reveal>
-          <span class="section-label__text">Coming Up</span>
-        </aside>
-        <div class="section-content">
-          <h2 class="section-heading" data-reveal>Upcoming<br /><em>Fixtures</em></h2>
-          <div class="fixtures-list" id="fixturesList"></div>
+    <!-- ══ SECTION: FIXTURES ══ -->
+    <section id="fixtures" class="page">
+      <div class="page-inner">
+        <div class="page-header">
+          <div class="page-label" data-anim="fade-right" data-delay="0">Coming Up</div>
+          <h2 class="page-title" data-anim="clip-up" data-delay="100">
+            Upcoming<br/><em>Fixtures</em>
+          </h2>
         </div>
+        <div class="fixtures-list" id="fixturesList"></div>
       </div>
     </section>
 
-  </main>
+  </div><!-- /pageWrapper -->
 
-  <script>
-/* js/data.js — FIFA World Cup 2026 live data */
+  <!-- ── TRANSITION OVERLAY ── -->
+  <div id="transitionOverlay">
+    <div class="overlay-block overlay-block--left"></div>
+    <div class="overlay-block overlay-block--right"></div>
+  </div>
 
-const FLAGS = {
-  MEX:'🇲🇽', RSA:'🇿🇦', KOR:'🇰🇷', CZE:'🇨🇿', SUI:'🇨🇭', CAN:'🇨🇦', BIH:'🇧🇦', QAT:'🇶🇦',
-  BRA:'🇧🇷', MAR:'🇲🇦', SCO:'🏴󠁧󠁢󠁳󠁣󠁴󠁿', HTI:'🇭🇹', USA:'🇺🇸', AUS:'🇦🇺', PAR:'🇵🇾', TUR:'🇹🇷',
-  GER:'🇩🇪', CIV:'🇨🇮', ECU:'🇪🇨', CUW:'🇨🇼', NED:'🇳🇱', JPN:'🇯🇵', SWE:'🇸🇪', TUN:'🇹🇳',
-  BEL:'🇧🇪', EGY:'🇪🇬', IRN:'🇮🇷', NZL:'🇳🇿', ESP:'🇪🇸', CPV:'🇨🇻', URU:'🇺🇾', KSA:'🇸🇦',
-  FRA:'🇫🇷', NOR:'🇳🇴', SEN:'🇸🇳', IRQ:'🇮🇶', ARG:'🇦🇷', AUT:'🇦🇹', DZA:'🇩🇿', JOR:'🇯🇴',
-  COL:'🇨🇴', POR:'🇵🇹', COD:'🇨🇩', UZB:'🇺🇿', ENG:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', CRO:'🇭🇷', GHA:'🇬🇭', PAN:'🇵🇦'
-};
-
-const NAMES = {
-  MEX:'Mexico',    RSA:'South Africa',  KOR:'Korea Republic', CZE:'Czechia',
-  SUI:'Switzerland',CAN:'Canada',       BIH:'Bosnia & Herz.', QAT:'Qatar',
-  BRA:'Brazil',    MAR:'Morocco',       SCO:'Scotland',        HTI:'Haiti',
-  USA:'USA',       AUS:'Australia',     PAR:'Paraguay',        TUR:'Türkiye',
-  GER:'Germany',   CIV:'Ivory Coast',   ECU:'Ecuador',         CUW:'Curaçao',
-  NED:'Netherlands',JPN:'Japan',        SWE:'Sweden',          TUN:'Tunisia',
-  BEL:'Belgium',   EGY:'Egypt',         IRN:'IR Iran',         NZL:'New Zealand',
-  ESP:'Spain',     CPV:'Cape Verde',    URU:'Uruguay',         KSA:'Saudi Arabia',
-  FRA:'France',    NOR:'Norway',        SEN:'Senegal',         IRQ:'Iraq',
-  ARG:'Argentina', AUT:'Austria',       DZA:'Algeria',         JOR:'Jordan',
-  COL:'Colombia',  POR:'Portugal',      COD:'Congo DR',        UZB:'Uzbekistan',
-  ENG:'England',   CRO:'Croatia',       GHA:'Ghana',           PAN:'Panama'
-};
-
-const SCORES = [
-  { home:'CPV', away:'KSA', scoreH:0, scoreA:0, date:'27 Jun' },
-  { home:'NZL', away:'BEL', scoreH:1, scoreA:5, date:'27 Jun' },
-  { home:'EGY', away:'IRN', scoreH:1, scoreA:1, date:'27 Jun' },
-  { home:'PAN', away:'ENG', scoreH:0, scoreA:2, date:'28 Jun' },
-  { home:'CRO', away:'GHA', scoreH:2, scoreA:1, date:'28 Jun' },
-  { home:'COL', away:'POR', scoreH:0, scoreA:0, date:'28 Jun' },
-  { home:'COD', away:'UZB', scoreH:3, scoreA:1, date:'28 Jun' },
-  { home:'JOR', away:'ARG', scoreH:1, scoreA:3, date:'28 Jun' },
-  { home:'DZA', away:'AUT', scoreH:3, scoreA:3, date:'28 Jun' },
-  { home:'RSA', away:'CAN', scoreH:0, scoreA:1, date:'29 Jun' },
-];
-
-const GROUPS = {
-  A: [
-    { t:'MEX', w:3, d:0, l:0, gf:7, ga:2, pts:9 },
-    { t:'RSA', w:1, d:1, l:1, gf:3, ga:4, pts:4 },
-    { t:'KOR', w:1, d:0, l:2, gf:3, ga:5, pts:3 },
-    { t:'CZE', w:0, d:1, l:2, gf:2, ga:4, pts:1 },
-  ],
-  B: [
-    { t:'SUI', w:2, d:1, l:0, gf:5, ga:2, pts:7 },
-    { t:'CAN', w:1, d:1, l:1, gf:3, ga:3, pts:4 },
-    { t:'BIH', w:1, d:1, l:1, gf:4, ga:4, pts:4 },
-    { t:'QAT', w:0, d:1, l:2, gf:1, ga:4, pts:1 },
-  ],
-  C: [
-    { t:'BRA', w:2, d:1, l:0, gf:6, ga:2, pts:7 },
-    { t:'MAR', w:2, d:1, l:0, gf:5, ga:2, pts:7 },
-    { t:'SCO', w:1, d:0, l:2, gf:3, ga:5, pts:3 },
-    { t:'HTI', w:0, d:0, l:3, gf:1, ga:6, pts:0 },
-  ],
-  D: [
-    { t:'USA', w:2, d:0, l:1, gf:5, ga:3, pts:6 },
-    { t:'AUS', w:1, d:1, l:1, gf:3, ga:3, pts:4 },
-    { t:'PAR', w:1, d:1, l:1, gf:3, ga:4, pts:4 },
-    { t:'TUR', w:1, d:0, l:2, gf:3, ga:4, pts:3 },
-  ],
-  E: [
-    { t:'GER', w:2, d:0, l:1, gf:7, ga:4, pts:6 },
-    { t:'CIV', w:2, d:0, l:1, gf:5, ga:3, pts:6 },
-    { t:'ECU', w:1, d:1, l:1, gf:4, ga:4, pts:4 },
-    { t:'CUW', w:0, d:1, l:2, gf:1, ga:6, pts:1 },
-  ],
-  F: [
-    { t:'NED', w:2, d:1, l:0, gf:6, ga:3, pts:7 },
-    { t:'JPN', w:1, d:2, l:0, gf:4, ga:3, pts:5 },
-    { t:'SWE', w:1, d:1, l:1, gf:4, ga:4, pts:4 },
-    { t:'TUN', w:0, d:0, l:3, gf:1, ga:5, pts:0 },
-  ],
-  G: [
-    { t:'BEL', w:1, d:2, l:0, gf:7, ga:4, pts:5 },
-    { t:'EGY', w:1, d:2, l:0, gf:3, ga:2, pts:5 },
-    { t:'IRN', w:0, d:3, l:0, gf:3, ga:3, pts:3 },
-    { t:'NZL', w:0, d:1, l:2, gf:2, ga:5, pts:1 },
-  ],
-  H: [
-    { t:'ESP', w:2, d:1, l:0, gf:8, ga:3, pts:7 },
-    { t:'CPV', w:0, d:3, l:0, gf:2, ga:2, pts:3 },
-    { t:'URU', w:0, d:2, l:1, gf:2, ga:4, pts:2 },
-    { t:'KSA', w:0, d:2, l:1, gf:2, ga:5, pts:2 },
-  ],
-  I: [
-    { t:'FRA', w:3, d:0, l:0, gf:9, ga:2, pts:9 },
-    { t:'NOR', w:2, d:0, l:1, gf:6, ga:4, pts:6 },
-    { t:'SEN', w:1, d:0, l:2, gf:4, ga:6, pts:3 },
-    { t:'IRQ', w:0, d:0, l:3, gf:1, ga:8, pts:0 },
-  ],
-  J: [
-    { t:'ARG', w:3, d:0, l:0, gf:8, ga:3, pts:9 },
-    { t:'AUT', w:1, d:1, l:1, gf:6, ga:6, pts:4 },
-    { t:'DZA', w:1, d:1, l:1, gf:5, ga:5, pts:4 },
-    { t:'JOR', w:0, d:0, l:3, gf:2, ga:7, pts:0 },
-  ],
-  K: [
-    { t:'COL', w:2, d:1, l:0, gf:5, ga:1, pts:7 },
-    { t:'POR', w:1, d:2, l:0, gf:5, ga:3, pts:5 },
-    { t:'COD', w:1, d:1, l:1, gf:5, ga:4, pts:4 },
-    { t:'UZB', w:0, d:0, l:3, gf:2, ga:9, pts:0 },
-  ],
-  L: [
-    { t:'ENG', w:2, d:1, l:0, gf:5, ga:2, pts:7 },
-    { t:'CRO', w:2, d:0, l:1, gf:5, ga:4, pts:6 },
-    { t:'GHA', w:1, d:1, l:1, gf:4, ga:4, pts:4 },
-    { t:'PAN', w:0, d:0, l:3, gf:1, ga:5, pts:0 },
-  ],
-};
-
-const FIXTURES = [
-  { home:'BRA', away:'JPN', time:'29 Jun · 10:30 PM IST', probH:57.1, probD:25.3, probA:17.6 },
-  { home:'GER', away:'PAR', time:'30 Jun · 2:00 AM IST',  probH:70.8, probD:18.4, probA:10.8 },
-  { home:'NED', away:'MAR', time:'30 Jun · 6:30 AM IST',  probH:41.7, probD:30.5, probA:27.8 },
-  { home:'CIV', away:'NOR', time:'30 Jun · 10:30 PM IST', probH:26.0, probD:27.1, probA:46.9 },
-  { home:'FRA', away:'SWE', time:'1 Jul · 2:30 AM IST',   probH:76.5, probD:14.6, probA:8.9  },
-  { home:'MEX', away:'ECU', time:'1 Jul · 6:30 AM IST',   probH:43.0, probD:32.3, probA:24.7 },
-  { home:'ENG', away:'COD', time:'1 Jul · 9:30 PM IST',   probH:76.2, probD:16.2, probA:7.6  },
-  { home:'BEL', away:'SEN', time:'2 Jul · 1:30 AM IST',   probH:43.6, probD:29.1, probA:27.3 },
-  { home:'USA', away:'BIH', time:'2 Jul · 5:30 AM IST',   probH:71.5, probD:18.3, probA:10.2 },
-  { home:'ESP', away:'AUT', time:'3 Jul · 12:30 AM IST',  probH:73.9, probD:17.3, probA:8.8  },
-];
-
-
-/* js/render.js — DOM builders for each section */
-
-/* ── Scores ─────────────────────────────────────── */
-function renderScores() {
-  const grid = document.getElementById('scoresGrid');
-  grid.innerHTML = '';
-
-  SCORES.forEach((m, i) => {
-    const card = document.createElement('div');
-    card.className = 'match-card';
-    card.style.transitionDelay = `${i * 50}ms`;
-
-    card.innerHTML = `
-      <div class="match-card__status">${m.date} &middot; Full Time</div>
-      <div class="match-card__teams">
-        <div class="match-card__team">
-          <span class="match-card__flag">${FLAGS[m.home] || '🏳'}</span>
-          <span class="match-card__abbr">${m.home}</span>
-        </div>
-        <div class="match-card__scoreline">
-          <span class="match-card__score">${m.scoreH}</span>
-          <span class="match-card__sep">–</span>
-          <span class="match-card__score">${m.scoreA}</span>
-        </div>
-        <div class="match-card__team">
-          <span class="match-card__flag">${FLAGS[m.away] || '🏳'}</span>
-          <span class="match-card__abbr">${m.away}</span>
-        </div>
-      </div>
-    `;
-    grid.appendChild(card);
-  });
-}
-
-/* ── Groups ──────────────────────────────────────── */
-let activeGroup = 'A';
-
-function renderGroupTabs() {
-  const tabs = document.getElementById('groupTabs');
-  tabs.innerHTML = '';
-
-  Object.keys(GROUPS).forEach(letter => {
-    const btn = document.createElement('button');
-    btn.className = 'group-tab' + (letter === activeGroup ? ' active' : '');
-    btn.textContent = letter;
-    btn.addEventListener('click', () => {
-      activeGroup = letter;
-      document.querySelectorAll('.group-tab').forEach(t => t.classList.remove('active'));
-      btn.classList.add('active');
-      renderGroupPanel();
-    });
-    tabs.appendChild(btn);
-  });
-}
-
-function renderGroupPanel() {
-  const panel = document.getElementById('groupPanel');
-  const teams = GROUPS[activeGroup];
-
-  const wrap = document.createElement('div');
-  wrap.className = 'group-table-wrap';
-
-  const rows = teams.map((t, i) => `
-    <tr class="${i < 2 ? 'qualifies' : ''}">
-      <td>
-        <div class="td-team">
-          <span class="td-flag">${FLAGS[t.t] || '🏳'}</span>
-          <span class="td-name">${NAMES[t.t] || t.t}</span>
-        </div>
-      </td>
-      <td>${t.w}</td>
-      <td>${t.d}</td>
-      <td>${t.l}</td>
-      <td>${t.gf}</td>
-      <td>${t.ga}</td>
-      <td class="td-pts">${t.pts}</td>
-    </tr>
-  `).join('');
-
-  wrap.innerHTML = `
-    <table class="group-table">
-      <thead>
-        <tr>
-          <th>Team</th>
-          <th>W</th><th>D</th><th>L</th>
-          <th>GF</th><th>GA</th>
-          <th>Pts</th>
-        </tr>
-      </thead>
-      <tbody>${rows}</tbody>
-    </table>
-  `;
-
-  panel.innerHTML = '';
-  panel.appendChild(wrap);
-}
-
-/* ── Fixtures ────────────────────────────────────── */
-function renderFixtures() {
-  const list = document.getElementById('fixturesList');
-  list.innerHTML = '';
-
-  FIXTURES.forEach((f, i) => {
-    const row = document.createElement('div');
-    row.className = 'fixture-row';
-    row.style.transitionDelay = `${i * 40}ms`;
-
-    const homeWidth = Math.round(f.probH);
-
-    row.innerHTML = `
-      <div class="fixture-team">
-        <span class="fixture-flag">${FLAGS[f.home] || '🏳'}</span>
-        <span class="fixture-name">${NAMES[f.home] || f.home}</span>
-      </div>
-      <div class="fixture-center">
-        <span class="fixture-vs">vs</span>
-        <span class="fixture-time">${f.time}</span>
-        <div class="fixture-prob">
-          <div class="fixture-prob__home" style="width:${homeWidth}%"></div>
-        </div>
-      </div>
-      <div class="fixture-team fixture-team--away">
-        <span class="fixture-flag">${FLAGS[f.away] || '🏳'}</span>
-        <span class="fixture-name">${NAMES[f.away] || f.away}</span>
-      </div>
-    `;
-    list.appendChild(row);
-  });
-}
-
-/* ── Boot ────────────────────────────────────────── */
-renderScores();
-renderGroupTabs();
-renderGroupPanel();
-renderFixtures();
-
-
-/* js/app.js — interactions, scroll tracking, animations */
-
-/* ── COUNT-UP ────────────────────────────────────── */
-function countUp(el) {
-  const target = parseInt(el.dataset.countup, 10);
-  const duration = 1200;
-  const start = performance.now();
-
-  function tick(now) {
-    const elapsed = now - start;
-    const progress = Math.min(elapsed / duration, 1);
-    // ease out expo
-    const eased = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
-    el.textContent = Math.floor(eased * target);
-    if (progress < 1) requestAnimationFrame(tick);
-  }
-
-  requestAnimationFrame(tick);
-}
-
-/* ── SNAP SCROLL + SIDE NAV ──────────────────────── */
-const container   = document.getElementById('snapContainer');
-const sections    = Array.from(document.querySelectorAll('.snap-section'));
-const navDots     = Array.from(document.querySelectorAll('.sidenav__dot'));
-const sectionH    = () => container.clientHeight;
-let   currentIdx  = 0;
-let   ticking     = false;
-
-function activateSection(idx) {
-  // update dots
-  navDots.forEach((d, i) => d.classList.toggle('active', i === idx));
-  currentIdx = idx;
-
-  // trigger reveals inside the active section
-  const sec = sections[idx];
-  sec.querySelectorAll('[data-reveal]').forEach((el, i) => {
-    setTimeout(() => el.classList.add('revealed'), i * 100);
-  });
-
-  // stagger cards / rows
-  sec.querySelectorAll('.match-card, .fixture-row').forEach((el, i) => {
-    setTimeout(() => el.classList.add('visible'), 80 + i * 50);
-  });
-
-  // countup numbers
-  sec.querySelectorAll('[data-countup]').forEach(el => {
-    if (!el.dataset.counted) {
-      el.dataset.counted = '1';
-      countUp(el);
-    }
-  });
-}
-
-// Read which section is in view via scroll position
-function onScroll() {
-  if (!ticking) {
-    requestAnimationFrame(() => {
-      const scrollTop = container.scrollTop;
-      const h = sectionH();
-      const idx = Math.round(scrollTop / h);
-      const clamped = Math.max(0, Math.min(idx, sections.length - 1));
-      if (clamped !== currentIdx) activateSection(clamped);
-      ticking = false;
-    });
-    ticking = true;
-  }
-}
-
-container.addEventListener('scroll', onScroll, { passive: true });
-
-// Dot clicks
-navDots.forEach((dot, i) => {
-  dot.addEventListener('click', () => {
-    container.scrollTo({ top: i * sectionH(), behavior: 'smooth' });
-  });
-});
-
-/* ── SECTION LABEL REVEAL via IntersectionObserver ─ */
-const revealObs = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('revealed');
-    }
-  });
-}, { threshold: 0.15, root: container });
-
-document.querySelectorAll('[data-reveal]').forEach(el => revealObs.observe(el));
-
-/* ── KEYBOARD NAV ────────────────────────────────── */
-document.addEventListener('keydown', e => {
-  if (e.key === 'ArrowDown' || e.key === 'PageDown') {
-    const next = Math.min(currentIdx + 1, sections.length - 1);
-    container.scrollTo({ top: next * sectionH(), behavior: 'smooth' });
-  }
-  if (e.key === 'ArrowUp' || e.key === 'PageUp') {
-    const prev = Math.max(currentIdx - 1, 0);
-    container.scrollTo({ top: prev * sectionH(), behavior: 'smooth' });
-  }
-});
-
-/* ── INIT ────────────────────────────────────────── */
-// Activate hero on load
-setTimeout(() => activateSection(0), 100);
-
-</script>
+  <!-- ── SCRIPTS (order matters) ── -->
+  <script src="js/data.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/parallax.js"></script>
+  <script src="js/interactions.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>
