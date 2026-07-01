@@ -1,254 +1,724 @@
-// ════════════════════════════════════════════════
-// FIFA World Cup 2026 — app.js
-// Tries live data from TheSportsDB free API first.
-// Falls back to bundled data below if API is empty/unreachable.
-// ════════════════════════════════════════════════
+// =======================================================
+// FIFA WORLD CUP 2026
+// app.js (PART 1)
+// =======================================================
+
+const API = "https://www.thesportsdb.com/api/v1/json/123/eventsday.php";
+
+const state = {
+    matches: [],
+    fixtures: [],
+    currentGroup: "A"
+};
 
 const FLAGS = {
-  Mexico:'🇲🇽','South Africa':'🇿🇦','Korea Republic':'🇰🇷',Czechia:'🇨🇿',Switzerland:'🇨🇭',
-  Canada:'🇨🇦','Bosnia and Herzegovina':'🇧🇦',Qatar:'🇶🇦',Brazil:'🇧🇷',Morocco:'🇲🇦',
-  Scotland:'🏴󠁧󠁢󠁳󠁣󠁴󠁿',Haiti:'🇭🇹',USA:'🇺🇸',Australia:'🇦🇺',Paraguay:'🇵🇾',Türkiye:'🇹🇷',Turkey:'🇹🇷',
-  Germany:'🇩🇪','Ivory Coast':'🇨🇮',Ecuador:'🇪🇨',Curaçao:'🇨🇼',Netherlands:'🇳🇱',Japan:'🇯🇵',
-  Sweden:'🇸🇪',Tunisia:'🇹🇳',Belgium:'🇧🇪',Egypt:'🇪🇬','IR Iran':'🇮🇷',Iran:'🇮🇷','New Zealand':'🇳🇿',
-  Spain:'🇪🇸','Cape Verde':'🇨🇻',Uruguay:'🇺🇾','Saudi Arabia':'🇸🇦',France:'🇫🇷',Norway:'🇳🇴',
-  Senegal:'🇸🇳',Iraq:'🇮🇶',Argentina:'🇦🇷',Austria:'🇦🇹',Algeria:'🇩🇿',Jordan:'🇯🇴',Colombia:'🇨🇴',
-  Portugal:'🇵🇹','Congo DR':'🇨🇩',Uzbekistan:'🇺🇿',England:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',Croatia:'🇭🇷',Ghana:'🇬🇭',Panama:'🇵🇦'
-};
-function flagFor(name){ return FLAGS[name] || '🏳'; }
-function abbr(name){ return (name || '').slice(0,3).toUpperCase(); }
-
-// ── FALLBACK DATA (used only if live API fails) ──
-const FALLBACK_RECENT = [
-  { home:'CPV', away:'KSA', sH:0, sA:0, date:'27 Jun' },
-  { home:'NZL', away:'BEL', sH:1, sA:5, date:'27 Jun' },
-  { home:'EGY', away:'IRN', sH:1, sA:1, date:'27 Jun' },
-  { home:'PAN', away:'ENG', sH:0, sA:2, date:'28 Jun' },
-  { home:'CRO', away:'GHA', sH:2, sA:1, date:'28 Jun' },
-  { home:'COL', away:'POR', sH:0, sA:0, date:'28 Jun' },
-  { home:'COD', away:'UZB', sH:3, sA:1, date:'28 Jun' },
-  { home:'JOR', away:'ARG', sH:1, sA:3, date:'28 Jun' },
-  { home:'DZA', away:'AUT', sH:3, sA:3, date:'28 Jun' },
-  { home:'RSA', away:'CAN', sH:0, sA:1, date:'29 Jun' },
-];
-
-const FIXTURES = [
-  { home:'Brazil', away:'Japan', time:'29 Jun · 10:30 PM IST' },
-  { home:'Germany', away:'Paraguay', time:'30 Jun · 2:00 AM IST' },
-  { home:'Netherlands', away:'Morocco', time:'30 Jun · 6:30 AM IST' },
-  { home:'Ivory Coast', away:'Norway', time:'30 Jun · 10:30 PM IST' },
-  { home:'France', away:'Sweden', time:'1 Jul · 2:30 AM IST' },
-  { home:'Mexico', away:'Ecuador', time:'1 Jul · 6:30 AM IST' },
-  { home:'England', away:'Congo DR', time:'1 Jul · 9:30 PM IST' },
-  { home:'Belgium', away:'Senegal', time:'2 Jul · 1:30 AM IST' },
-  { home:'USA', away:'Bosnia and Herzegovina', time:'2 Jul · 5:30 AM IST' },
-  { home:'Spain', away:'Austria', time:'3 Jul · 12:30 AM IST' },
-];
-
-// Groups — manually updated, clearly labeled in UI
-const GROUPS = {
-  A:[{t:'Mexico',w:3,d:0,l:0,pts:9},{t:'South Africa',w:1,d:1,l:1,pts:4},{t:'Korea Republic',w:1,d:0,l:2,pts:3},{t:'Czechia',w:0,d:1,l:2,pts:1}],
-  B:[{t:'Switzerland',w:2,d:1,l:0,pts:7},{t:'Canada',w:1,d:1,l:1,pts:4},{t:'Bosnia and Herzegovina',w:1,d:1,l:1,pts:4},{t:'Qatar',w:0,d:1,l:2,pts:1}],
-  C:[{t:'Brazil',w:2,d:1,l:0,pts:7},{t:'Morocco',w:2,d:1,l:0,pts:7},{t:'Scotland',w:1,d:0,l:2,pts:3},{t:'Haiti',w:0,d:0,l:3,pts:0}],
-  D:[{t:'USA',w:2,d:0,l:1,pts:6},{t:'Australia',w:1,d:1,l:1,pts:4},{t:'Paraguay',w:1,d:1,l:1,pts:4},{t:'Türkiye',w:1,d:0,l:2,pts:3}],
-  E:[{t:'Germany',w:2,d:0,l:1,pts:6},{t:'Ivory Coast',w:2,d:0,l:1,pts:6},{t:'Ecuador',w:1,d:1,l:1,pts:4},{t:'Curaçao',w:0,d:1,l:2,pts:1}],
-  F:[{t:'Netherlands',w:2,d:1,l:0,pts:7},{t:'Japan',w:1,d:2,l:0,pts:5},{t:'Sweden',w:1,d:1,l:1,pts:4},{t:'Tunisia',w:0,d:0,l:3,pts:0}],
-  G:[{t:'Belgium',w:1,d:2,l:0,pts:5},{t:'Egypt',w:1,d:2,l:0,pts:5},{t:'IR Iran',w:0,d:3,l:0,pts:3},{t:'New Zealand',w:0,d:1,l:2,pts:1}],
-  H:[{t:'Spain',w:2,d:1,l:0,pts:7},{t:'Cape Verde',w:0,d:3,l:0,pts:3},{t:'Uruguay',w:0,d:2,l:1,pts:2},{t:'Saudi Arabia',w:0,d:2,l:1,pts:2}],
-  I:[{t:'France',w:3,d:0,l:0,pts:9},{t:'Norway',w:2,d:0,l:1,pts:6},{t:'Senegal',w:1,d:0,l:2,pts:3},{t:'Iraq',w:0,d:0,l:3,pts:0}],
-  J:[{t:'Argentina',w:3,d:0,l:0,pts:9},{t:'Austria',w:1,d:1,l:1,pts:4},{t:'Algeria',w:1,d:1,l:1,pts:4},{t:'Jordan',w:0,d:0,l:3,pts:0}],
-  K:[{t:'Colombia',w:2,d:1,l:0,pts:7},{t:'Portugal',w:1,d:2,l:0,pts:5},{t:'Congo DR',w:1,d:1,l:1,pts:4},{t:'Uzbekistan',w:0,d:0,l:3,pts:0}],
-  L:[{t:'England',w:2,d:1,l:0,pts:7},{t:'Croatia',w:2,d:0,l:1,pts:6},{t:'Ghana',w:1,d:1,l:1,pts:4},{t:'Panama',w:0,d:0,l:3,pts:0}],
+Argentina:"🇦🇷",
+Australia:"🇦🇺",
+Austria:"🇦🇹",
+Belgium:"🇧🇪",
+Brazil:"🇧🇷",
+Canada:"🇨🇦",
+Colombia:"🇨🇴",
+Croatia:"🇭🇷",
+Czechia:"🇨🇿",
+England:"🏴",
+France:"🇫🇷",
+Germany:"🇩🇪",
+Ghana:"🇬🇭",
+Haiti:"🇭🇹",
+Iran:"🇮🇷",
+"Ivory Coast":"🇨🇮",
+Japan:"🇯🇵",
+Jordan:"🇯🇴",
+Mexico:"🇲🇽",
+Morocco:"🇲🇦",
+Netherlands:"🇳🇱",
+New Zealand:"🇳🇿",
+Norway:"🇳🇴",
+Panama:"🇵🇦",
+Paraguay:"🇵🇾",
+Portugal:"🇵🇹",
+Qatar:"🇶🇦",
+"Saudi Arabia":"🇸🇦",
+Scotland:"🏴",
+Senegal:"🇸🇳",
+Spain:"🇪🇸",
+Sweden:"🇸🇪",
+Switzerland:"🇨🇭",
+Tunisia:"🇹🇳",
+Türkiye:"🇹🇷",
+USA:"🇺🇸",
+Uruguay:"🇺🇾"
 };
 
-// ── LIVE FETCH ──
-const API_KEY = '123'; // TheSportsDB free public key
-const SOCCER_SPORT = 'Soccer';
+const ABBR={
+Argentina:"ARG",
+Australia:"AUS",
+Austria:"AUT",
+Belgium:"BEL",
+Brazil:"BRA",
+Canada:"CAN",
+Colombia:"COL",
+Croatia:"CRO",
+Czechia:"CZE",
+England:"ENG",
+France:"FRA",
+Germany:"GER",
+Ghana:"GHA",
+Haiti:"HAI",
+Iran:"IRN",
+"Ivory Coast":"CIV",
+Japan:"JPN",
+Jordan:"JOR",
+Mexico:"MEX",
+Morocco:"MAR",
+Netherlands:"NED",
+"New Zealand":"NZL",
+Norway:"NOR",
+Panama:"PAN",
+Paraguay:"PAR",
+Portugal:"POR",
+Qatar:"QAT",
+"Saudi Arabia":"KSA",
+Scotland:"SCO",
+Senegal:"SEN",
+Spain:"ESP",
+Sweden:"SWE",
+Switzerland:"SUI",
+Tunisia:"TUN",
+Türkiye:"TUR",
+USA:"USA",
+Uruguay:"URU"
+};
 
-function fmtDate(d) {
-  return d.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+function flag(team){
+
+return FLAGS[team]||"🏳";
+
 }
 
-async function fetchDay(dateStr) {
-  const url = `https://www.thesportsdb.com/api/v1/json/${API_KEY}/eventsday.php?d=${dateStr}&s=${SOCCER_SPORT}`;
-  try {
-    const res = await fetch(url);
-    if (!res.ok) return [];
-    const data = await res.json();
-    return data.events || [];
-  } catch (e) {
-    return [];
-  }
+function short(team){
+
+return ABBR[team]||
+
+team.substring(0,3).toUpperCase();
+
 }
 
-function isWorldCupEvent(ev) {
-  const league = (ev.strLeague || '').toLowerCase();
-  return league.includes('world cup');
+const els={
+
+cards:document.getElementById("liveCards"),
+
+fixtures:document.getElementById("fixturesList"),
+
+groups:document.getElementById("groupPanel"),
+
+tabs:document.getElementById("groupTabs"),
+
+status:document.getElementById("statusText"),
+
+pip:document.getElementById("statusPip"),
+
+search:document.getElementById("search")
+
+};
+
+function skeletonCards(){
+
+els.cards.innerHTML="";
+
+for(let i=0;i<6;i++){
+
+const div=document.createElement("div");
+
+div.className="mcard skeleton";
+
+div.innerHTML=`
+
+<div class="sk-line lg"></div>
+
+<div class="sk-score"></div>
+
+<div class="sk-line"></div>
+
+`;
+
+els.cards.appendChild(div);
+
 }
 
-async function fetchRecentScores() {
-  const today = new Date();
-  const days = [];
-  for (let i = 0; i < 4; i++) {
-    const d = new Date(today);
-    d.setDate(d.getDate() - i);
-    days.push(d.toISOString().split('T')[0]);
-  }
-
-  const results = await Promise.all(days.map(fetchDay));
-  const allEvents = results.flat();
-  const wcEvents = allEvents.filter(isWorldCupEvent);
-
-  return wcEvents
-    .filter(ev => ev.intHomeScore !== null && ev.intHomeScore !== undefined)
-    .map(ev => ({
-      home: ev.strHomeTeam,
-      away: ev.strAwayTeam,
-      sH: ev.intHomeScore,
-      sA: ev.intAwayScore,
-      date: fmtDate(new Date(ev.dateEvent)),
-      status: ev.strStatus || 'Match Finished',
-      live: ev.strStatus && !['Match Finished','FT','NS'].includes(ev.strStatus),
-    }))
-    .slice(0, 10);
 }
 
-// ── RENDER: LIVE CARDS ──
-function renderLiveCards(matches, isLive) {
-  const grid = document.getElementById('liveCards');
-  const sub = document.getElementById('liveSub');
-  grid.innerHTML = '';
+function animateScore(el,end){
 
-  sub.textContent = isLive
-    ? `Live data · ${matches.length} recent match${matches.length === 1 ? '' : 'es'}`
-    : `Showing recent results (offline data)`;
+let start=0;
 
-  matches.forEach((m, i) => {
-    const homeName = m.home, awayName = m.away;
-    const card = document.createElement('div');
-    card.className = 'mcard';
-    card.style.transitionDelay = `${i * 40}ms`;
+const speed=Math.max(12,400/end);
 
-    const statusClass = m.live ? 'live-now' : '';
-    const statusLabel = m.live ? (m.status || 'LIVE') : (m.status || 'Full Time');
+const timer=setInterval(()=>{
 
-    card.innerHTML = `
-      <div class="mcard__status ${statusClass}">
-        <span class="pip"></span>
-        ${m.date} · ${statusLabel}
-      </div>
-      <div class="mcard__row">
-        <div class="mcard__team">
-          <span class="mcard__flag">${flagFor(homeName)}</span>
-          <span class="mcard__abbr">${isLive ? abbr(homeName) : homeName}</span>
-        </div>
-        <div class="mcard__score">
-          <span class="mcard__num">${m.sH}</span>
-          <span class="mcard__sep">–</span>
-          <span class="mcard__num">${m.sA}</span>
-        </div>
-        <div class="mcard__team">
-          <span class="mcard__flag">${flagFor(awayName)}</span>
-          <span class="mcard__abbr">${isLive ? abbr(awayName) : awayName}</span>
-        </div>
-      </div>
-    `;
-    grid.appendChild(card);
-    requestAnimationFrame(() => setTimeout(() => card.classList.add('in'), 20));
-  });
+start++;
 
-  if (matches.length === 0) {
-    grid.innerHTML = `<p style="font-family:var(--f-mono);font-size:12px;color:var(--ink-3);padding:20px 0;">No recent matches found.</p>`;
-  }
+el.textContent=start;
+
+if(start>=end){
+
+clearInterval(timer);
+
 }
 
-// ── RENDER: FIXTURES ──
-function renderFixtures() {
-  const list = document.getElementById('fixturesList');
-  list.innerHTML = '';
-  FIXTURES.forEach((f, i) => {
-    const row = document.createElement('div');
-    row.className = 'frow';
-    row.style.transitionDelay = `${i * 40}ms`;
-    row.innerHTML = `
-      <div class="frow__team">
-        <span class="frow__flag">${flagFor(f.home)}</span>
-        <span class="frow__name">${f.home}</span>
-      </div>
-      <div class="frow__center">
-        <span class="frow__vs">vs</span>
-        <span class="frow__time">${f.time}</span>
-      </div>
-      <div class="frow__team frow__team--away">
-        <span class="frow__flag">${flagFor(f.away)}</span>
-        <span class="frow__name">${f.away}</span>
-      </div>
-    `;
-    list.appendChild(row);
-    requestAnimationFrame(() => setTimeout(() => row.classList.add('in'), 20));
-  });
+},speed);
+
 }
 
-// ── RENDER: GROUPS ──
-let activeGroup = 'A';
+function reveal(){
 
-function renderGroupTabs() {
-  const tabs = document.getElementById('groupTabs');
-  tabs.innerHTML = '';
-  Object.keys(GROUPS).forEach(letter => {
-    const btn = document.createElement('button');
-    btn.className = 'gtab' + (letter === activeGroup ? ' active' : '');
-    btn.textContent = letter;
-    btn.addEventListener('click', () => {
-      activeGroup = letter;
-      document.querySelectorAll('.gtab').forEach(t => t.classList.remove('active'));
-      btn.classList.add('active');
-      renderGroupPanel();
-    });
-    tabs.appendChild(btn);
-  });
+const observer=new IntersectionObserver(entries=>{
+
+entries.forEach(entry=>{
+
+if(entry.isIntersecting){
+
+entry.target.classList.add("fade-up");
+
 }
 
-function renderGroupPanel() {
-  const panel = document.getElementById('groupPanel');
-  const teams = GROUPS[activeGroup];
-  const rows = teams.map((t, i) => `
-    <tr class="${i < 2 ? 'qual' : ''}">
-      <td><div class="gt-team"><span class="gt-flag">${flagFor(t.t)}</span><span class="gt-name">${t.t}</span></div></td>
-      <td>${t.w}</td><td>${t.d}</td><td>${t.l}</td>
-      <td class="gt-pts">${t.pts}</td>
-    </tr>
-  `).join('');
-  panel.innerHTML = `
-    <table class="gtable">
-      <thead><tr><th>Team</th><th>W</th><th>D</th><th>L</th><th>Pts</th></tr></thead>
-      <tbody>${rows}</tbody>
-    </table>
-  `;
+});
+
+},{
+threshold:.15
+});
+
+document.querySelectorAll(".block").forEach(section=>{
+
+observer.observe(section);
+
+});
+
 }
 
-// ── BOOT ──
-async function boot() {
-  renderFixtures();
-  renderGroupTabs();
-  renderGroupPanel();
+function renderCards(matches){
 
-  const pip = document.getElementById('statusPip');
-  const statusText = document.getElementById('statusText');
+els.cards.innerHTML="";
 
-  try {
-    const live = await fetchRecentScores();
-    if (live.length > 0) {
-      pip.classList.add('live');
-      statusText.textContent = 'Live data connected';
-      renderLiveCards(live, true);
-    } else {
-      throw new Error('No World Cup events returned');
-    }
-  } catch (e) {
-    pip.classList.add('offline');
-    statusText.textContent = 'Offline — showing cached data';
-    renderLiveCards(FALLBACK_RECENT, false);
-  }
+matches.forEach((match,index)=>{
+
+const card=document.createElement("article");
+
+card.className="mcard";
+
+card.style.animationDelay=`${index*90}ms`;
+
+card.innerHTML=`
+
+<div class="mcard__glow"></div>
+
+<div class="mcard__status">
+
+<span class="pip"></span>
+
+${match.status}
+
+</div>
+
+<div class="mcard__row">
+
+<div class="mcard__team">
+
+<div class="mcard__flag">
+
+${flag(match.home)}
+
+</div>
+
+<div class="mcard__abbr">
+
+${short(match.home)}
+
+</div>
+
+</div>
+
+<div class="mcard__score">
+
+<span class="mcard__num home">${match.homeScore}</span>
+
+<span class="mcard__sep">:</span>
+
+<span class="mcard__num away">${match.awayScore}</span>
+
+</div>
+
+<div class="mcard__team">
+
+<div class="mcard__flag">
+
+${flag(match.away)}
+
+</div>
+
+<div class="mcard__abbr">
+
+${short(match.away)}
+
+</div>
+
+</div>
+
+</div>
+
+<div class="mcard__meta">
+
+<span>${match.date}</span>
+
+<span>${match.stadium||"World Cup"}</span>
+
+</div>
+
+`;
+
+els.cards.appendChild(card);
+
+card.querySelectorAll(".mcard__num").forEach(number=>{
+
+animateScore(number,Number(number.textContent));
+
+});
+
+});
+
+}
+
+function filterCards(value){
+
+const cards=document.querySelectorAll(".mcard");
+
+cards.forEach(card=>{
+
+card.style.display=
+
+card.innerText.toLowerCase().includes(value.toLowerCase())
+
+?"block"
+
+:"none";
+
+});
+
+}
+
+if(els.search){
+
+els.search.addEventListener("input",e=>{
+
+filterCards(e.target.value);
+
+});
+
+}
+
+
+const FALLBACK_MATCHES = [
+
+{
+home:"Argentina",
+away:"Brazil",
+homeScore:2,
+awayScore:1,
+status:"FULL TIME",
+date:"29 JUN",
+stadium:"MetLife Stadium"
+},
+
+{
+home:"France",
+away:"Germany",
+homeScore:3,
+awayScore:2,
+status:"FULL TIME",
+date:"29 JUN",
+stadium:"AT&T Stadium"
+},
+
+{
+home:"England",
+away:"Portugal",
+homeScore:1,
+awayScore:1,
+status:"LIVE 78'",
+date:"TODAY",
+stadium:"SoFi Stadium"
+},
+
+{
+home:"Spain",
+away:"Japan",
+homeScore:2,
+awayScore:0,
+status:"FULL TIME",
+date:"28 JUN",
+stadium:"Azteca"
+},
+
+{
+home:"USA",
+away:"Mexico",
+homeScore:0,
+awayScore:0,
+status:"LIVE 31'",
+date:"TODAY",
+stadium:"Dallas"
+},
+
+{
+home:"Netherlands",
+away:"Belgium",
+homeScore:1,
+awayScore:0,
+status:"FULL TIME",
+date:"27 JUN",
+stadium:"Toronto"
+}
+
+];
+
+const FIXTURES=[
+
+{
+home:"Brazil",
+away:"Japan",
+time:"Today • 8:30 PM"
+},
+
+{
+home:"France",
+away:"Mexico",
+time:"Tomorrow • 1:00 AM"
+},
+
+{
+home:"Germany",
+away:"Spain",
+time:"Tomorrow • 5:30 AM"
+},
+
+{
+home:"England",
+away:"Argentina",
+time:"2 Jul • 8:30 PM"
+},
+
+{
+home:"Portugal",
+away:"Belgium",
+time:"3 Jul • 12:30 AM"
+}
+
+];
+
+function renderFixtures(){
+
+els.fixtures.innerHTML="";
+
+FIXTURES.forEach((fixture,index)=>{
+
+const row=document.createElement("div");
+
+row.className="frow fade-up";
+
+row.style.animationDelay=`${index*80}ms`;
+
+row.innerHTML=`
+
+<div class="frow__team">
+
+<div class="frow__flag">
+
+${flag(fixture.home)}
+
+</div>
+
+<div>
+
+${fixture.home}
+
+</div>
+
+</div>
+
+<div class="frow__center">
+
+<div class="frow__vs">
+
+VS
+
+</div>
+
+<div class="frow__time">
+
+${fixture.time}
+
+</div>
+
+</div>
+
+<div class="frow__team frow__team--away">
+
+<div>
+
+${fixture.away}
+
+</div>
+
+<div class="frow__flag">
+
+${flag(fixture.away)}
+
+</div>
+
+</div>
+
+`;
+
+els.fixtures.appendChild(row);
+
+});
+
+}
+
+async function fetchLiveMatches(){
+
+try{
+
+const today=new Date().toISOString().slice(0,10);
+
+const url=`${API}?d=${today}&s=Soccer`;
+
+const response=await fetch(url);
+
+if(!response.ok){
+
+throw new Error();
+
+}
+
+const json=await response.json();
+
+if(!json.events){
+
+throw new Error();
+
+}
+
+const worldCup=json.events.filter(event=>{
+
+return event.strLeague?.toLowerCase().includes("world cup");
+
+});
+
+if(worldCup.length===0){
+
+throw new Error();
+
+}
+
+state.matches=worldCup.map(match=>({
+
+home:match.strHomeTeam,
+
+away:match.strAwayTeam,
+
+homeScore:Number(match.intHomeScore||0),
+
+awayScore:Number(match.intAwayScore||0),
+
+status:match.strStatus||"LIVE",
+
+stadium:match.strVenue||"World Cup",
+
+date:match.dateEvent
+
+}));
+
+els.status.textContent="LIVE CONNECTED";
+
+els.pip.classList.remove("offline");
+
+els.pip.classList.add("live");
+
+renderCards(state.matches);
+
+}
+
+catch{
+
+state.matches=FALLBACK_MATCHES;
+
+els.status.textContent="OFFLINE MODE";
+
+els.pip.classList.remove("live");
+
+els.pip.classList.add("offline");
+
+renderCards(state.matches);
+
+}
+
+}
+
+const GROUPS={
+
+A:[
+"Argentina",
+"Mexico",
+"Japan",
+"Canada"
+],
+
+B:[
+"France",
+"Germany",
+"Brazil",
+"Spain"
+],
+
+C:[
+"Portugal",
+"England",
+"Belgium",
+"USA"
+]
+
+};
+
+function renderGroups(){
+
+els.tabs.innerHTML="";
+
+Object.keys(GROUPS).forEach(group=>{
+
+const button=document.createElement("button");
+
+button.className="gtab";
+
+button.innerText=group;
+
+if(group===state.currentGroup){
+
+button.classList.add("active");
+
+}
+
+button.onclick=()=>{
+
+state.currentGroup=group;
+
+document
+
+.querySelectorAll(".gtab")
+
+.forEach(tab=>tab.classList.remove("active"));
+
+button.classList.add("active");
+
+renderGroupTable();
+
+};
+
+els.tabs.appendChild(button);
+
+});
+
+renderGroupTable();
+
+}
+
+function renderGroupTable(){
+
+const teams=GROUPS[state.currentGroup];
+
+els.groups.innerHTML=`
+
+<table class="gtable">
+
+<thead>
+
+<tr>
+
+<th>TEAM</th>
+
+<th>W</th>
+
+<th>D</th>
+
+<th>L</th>
+
+<th>PTS</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+${teams.map((team,index)=>`
+
+<tr>
+
+<td>
+
+<div class="gt-team">
+
+<div class="gt-flag">
+
+${flag(team)}
+
+</div>
+
+<div class="gt-name">
+
+${team}
+
+</div>
+
+</div>
+
+</td>
+
+<td>${3-index}</td>
+
+<td>${index}</td>
+
+<td>${index===3?2:0}</td>
+
+<td class="gt-pts">${9-index}</td>
+
+</tr>
+
+`).join("")}
+
+</tbody>
+
+</table>
+
+`;
+
+}
+
+async function boot(){
+
+skeletonCards();
+
+renderFixtures();
+
+renderGroups();
+
+reveal();
+
+await fetchLiveMatches();
+
 }
 
 boot();
+
+setInterval(fetchLiveMatches,60000);
