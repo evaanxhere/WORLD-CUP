@@ -1,61 +1,284 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>FIFA World Cup 2026 — Live</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,900&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="css/style.css" />
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>FIFA World Cup 2026 | Live Dashboard</title>
+
+<meta name="theme-color" content="#08111f">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/style.css">
+
 </head>
+
 <body>
 
-  <!-- TOP BAR -->
-  <header class="topbar">
-    <span class="topbar__mark">FIFA WC 2026</span>
-    <div class="topbar__status" id="apiStatus">
-      <span class="status-pip" id="statusPip"></span>
-      <span id="statusText">Connecting…</span>
-    </div>
-    <span class="topbar__host">USA · CAN · MEX</span>
-  </header>
+<div class="bg-grid"></div>
 
-  <main class="wrap">
+<div class="noise"></div>
 
-    <!-- ══ LIVE / RECENT — FIRST THING YOU SEE ══ -->
-    <section class="block" id="live-block">
-      <div class="block-head">
-        <h1 class="block-title">Live &amp; Recent</h1>
-        <p class="block-sub" id="liveSub">Pulling latest results…</p>
-      </div>
-      <div class="cards" id="liveCards"></div>
-    </section>
+<header class="topbar">
 
-    <!-- ══ UPCOMING ══ -->
-    <section class="block">
-      <div class="block-head">
-        <h2 class="block-title block-title--sm">Upcoming Fixtures</h2>
-      </div>
-      <div class="fixtures" id="fixturesList"></div>
-    </section>
+<div class="logo">
 
-    <!-- ══ GROUPS ══ -->
-    <section class="block">
-      <div class="block-head">
-        <h2 class="block-title block-title--sm">Group Standings</h2>
-        <span class="manual-tag">Updated manually</span>
-      </div>
-      <div class="group-tabs" id="groupTabs"></div>
-      <div class="group-table-wrap" id="groupPanel"></div>
-    </section>
+<div class="logo-ball"></div>
 
-  </main>
+<div>
 
-  <footer class="footer">
-    <span>FIFA World Cup 2026 · Scores via TheSportsDB (free public API), refreshed on load</span>
-  </footer>
+<h3>WORLD CUP</h3>
 
-  <script src="js/app.js"></script>
+<p>2026 Dashboard</p>
+
+</div>
+
+</div>
+
+<nav>
+
+<a href="#hero">Home</a>
+
+<a href="#live-block">Matches</a>
+
+<a href="#groups">Groups</a>
+
+<a href="#footer">About</a>
+
+</nav>
+
+<div class="topbar__status" id="apiStatus">
+
+<span class="status-pip" id="statusPip"></span>
+
+<span id="statusText">Connecting...</span>
+
+</div>
+
+</header>
+
+<section class="hero" id="hero">
+
+<div class="hero-content">
+
+<div class="hero-tag">
+
+⚽ FIFA WORLD CUP 2026
+
+</div>
+
+<h1>
+
+THE
+
+<span>BIGGEST</span>
+
+SHOW
+
+ON EARTH
+
+</h1>
+
+<p>
+
+Follow every live score, standings, statistics and every moment from the biggest football tournament.
+
+</p>
+
+<div class="hero-buttons">
+
+<a href="#live-block" class="btn-primary">
+
+Explore Matches
+
+</a>
+
+<a href="#groups" class="btn-secondary">
+
+Groups
+
+</a>
+
+</div>
+
+</div>
+
+<div class="hero-score">
+
+<div class="live-badge">
+
+<span></span>
+
+LIVE MATCH
+
+</div>
+
+<div class="teams">
+
+<div>
+
+🇦🇷
+
+<h3>Argentina</h3>
+
+</div>
+
+<div class="score">
+
+2
+
+<span>-</span>
+
+1
+
+</div>
+
+<div>
+
+🇧🇷
+
+<h3>Brazil</h3>
+
+</div>
+
+</div>
+
+<div class="stats">
+
+<div>
+
+<h4>Possession</h4>
+
+<p>61%</p>
+
+</div>
+
+<div>
+
+<h4>Shots</h4>
+
+<p>14</p>
+
+</div>
+
+<div>
+
+<h4>Minute</h4>
+
+<p>84'</p>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<main class="wrap">
+
+<section class="block" id="live-block">
+
+<div class="block-head">
+
+<div>
+
+<h2 class="section-title">
+
+LIVE & RECENT
+
+</h2>
+
+<p id="liveSub">
+
+Fetching latest matches...
+
+</p>
+
+</div>
+
+</div>
+
+<div class="cards" id="liveCards"></div>
+
+</section>
+
+<section class="block">
+
+<div class="block-head">
+
+<h2 class="section-title">
+
+UPCOMING FIXTURES
+
+</h2>
+
+</div>
+
+<div id="fixturesList" class="fixtures"></div>
+
+</section>
+
+<section class="block" id="groups">
+
+<div class="block-head">
+
+<h2 class="section-title">
+
+GROUP STANDINGS
+
+</h2>
+
+<div class="manual-tag">
+
+Updated Daily
+
+</div>
+
+</div>
+
+<div id="groupTabs" class="group-tabs"></div>
+
+<div id="groupPanel" class="group-table-wrap"></div>
+
+</section>
+
+</main>
+
+<footer class="footer" id="footer">
+
+<div>
+
+<h2>
+
+WORLD CUP 2026
+
+</h2>
+
+<p>
+
+Live scores · Standings · Fixtures · Statistics
+
+</p>
+
+</div>
+
+<div>
+
+Powered by TheSportsDB API
+
+</div>
+
+</footer>
+
+<script src="js/app.js"></script>
+
 </body>
+
 </html>
