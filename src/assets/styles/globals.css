@@ -1,1 +1,21 @@
+@import "tailwindcss";
 
+html{
+
+scroll-behavior:smooth;
+
+}
+
+body{
+
+margin:0;
+
+background:#05070d;
+
+color:white;
+
+font-family:Inter,sans-serif;
+
+overflow-x:hidden;
+
+}
